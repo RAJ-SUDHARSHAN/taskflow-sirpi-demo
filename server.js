@@ -7,7 +7,7 @@ const authRoutes = require('./src/routes/auth');
 const taskRoutes = require('./src/routes/tasks');
 
 const app = express();
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors());
@@ -18,7 +18,16 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/api/auth', authRoutes);
 app.use('/api/tasks', taskRoutes);
 
-// Health check endpoint
+// Health check endpoint (used by ALB)
+app.get('/health', (req, res) => {
+  res.json({ 
+    status: 'healthy', 
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
+  });
+});
+
+// API health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'healthy', 
@@ -43,5 +52,6 @@ app.use((err, req, res, next) => {
 
 app.listen(PORT, () => {
   console.log(`🚀 TaskFlow API running on port ${PORT}`);
-  console.log(`📍 Health check: http://localhost:${PORT}/api/health`);
+  console.log(`📍 Health check: http://localhost:${PORT}/health`);
+  console.log(`📍 API health check: http://localhost:${PORT}/api/health`);
 });
